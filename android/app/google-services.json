@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "4705323814",
+    "project_id": "todo-fall-2024-0",
+    "storage_bucket": "todo-fall-2024-0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:4705323814:android:1f5cd85a35de7b1776cfe7",
+        "android_client_info": {
+          "package_name": "edu.todo.fall20240"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqRWaq7xzyMT96jYbUmao7JYFwBg47Cxk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
