@@ -4,7 +4,7 @@ class Todo {
   final String id;
   final DateTime? completedAt;
   final String text;
-  final DateTime timestamp;
+  final DateTime? timestamp;
   final String userId;
 
   Todo({
@@ -17,10 +17,9 @@ class Todo {
 
   Map<String, dynamic> toMap() {
     return {
-      'completedAt':
-          completedAt == null ? null : Timestamp.fromDate(completedAt!),
+      'completedAt': completedAt == null ? null : Timestamp.fromDate(completedAt!),
       'text': text,
-      'timestamp': Timestamp.fromDate(timestamp),
+      'timestamp': timestamp == null ? null : Timestamp.fromDate(timestamp!),
       'userId': userId,
     };
   }
@@ -30,7 +29,7 @@ class Todo {
       id: id,
       completedAt: (map['completedAt'] as Timestamp?)?.toDate(),
       text: map['text']?.toString() ?? '',
-      timestamp: (map['timestamp'] as Timestamp).toDate(),
+      timestamp: (map['timestamp'] as Timestamp?)?.toDate(),
       userId: map['userId']?.toString() ?? '',
     );
   }
