@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// TODO: Use https://pub.dev/packages/equatable
 class Todo {
   final String id;
   final DateTime? completedAt;
@@ -15,6 +16,16 @@ class Todo {
     required this.userId,
   });
 
+  factory Todo.fromMap(String id, Map<String, dynamic> map) {
+    return Todo(
+      id: id,
+      completedAt: (map['completedAt'] as Timestamp?)?.toDate(),
+      text: map['text']?.toString() ?? '',
+      timestamp: (map['timestamp'] as Timestamp?)?.toDate(),
+      userId: map['userId']?.toString() ?? '',
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'completedAt': completedAt == null ? null : Timestamp.fromDate(completedAt!),
@@ -24,13 +35,10 @@ class Todo {
     };
   }
 
-  factory Todo.fromMap(String id, Map<String, dynamic> map) {
-    return Todo(
-      id: id,
-      completedAt: (map['completedAt'] as Timestamp?)?.toDate(),
-      text: map['text']?.toString() ?? '',
-      timestamp: (map['timestamp'] as Timestamp?)?.toDate(),
-      userId: map['userId']?.toString() ?? '',
-    );
+  bool isEqualTo(Todo other) {
+    if (text != other.text) return false;
+    if (completedAt == null && other.completedAt != null) return false;
+    if (completedAt != null && other.completedAt == null) return false;
+    return true;
   }
 }

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:todo_fall_2024_0/screen/home/widgets/search_filter_bar.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/text_input_row.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/todos_list.dart';
 
@@ -23,6 +24,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<Todo> allTodos = [];
+  List<Todo> displayTodos = [];
+  String searchQuery = '';
+  bool hideCompleted = false;
+
   @override
   Widget build(BuildContext context) {
     final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -45,6 +51,23 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
+          SearchFilterBar(
+            onChanged: (query) {
+              setState(() {
+                searchQuery = query;
+                displayTodos = _filterTodos(allTodos);
+              });
+            },
+          ),
+          Checkbox(
+            value: hideCompleted,
+            onChanged: (checked) {
+              setState(() {
+                hideCompleted = checked ?? false;
+                displayTodos = _filterTodos(allTodos);
+              });
+            },
+          ),
           Expanded(
             child: StreamBuilder<List<Todo>>(
               stream: _getTodosByUserId(userId),
@@ -61,10 +84,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Center(child: Text('Add your first ToDo'));
                 }
 
+                final backendTodos = snapshot.data ?? [];
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!_areEqual(allTodos, backendTodos)) {
+                    setState(() {
+                      allTodos = backendTodos;
+                      displayTodos = _filterTodos(backendTodos);
+                    });
+                  }
+                });
+
                 return TodosList(
-                  todos: snapshot.data ?? [],
-                  onCheck: (todoId, checked) =>
-                      _updateTodoStatus(todoId, checked),
+                  todos: displayTodos,
+                  onCheck: (todoId, checked) {
+                    _updateTodoStatus(todoId, checked);
+                  },
                 );
               },
             ),
@@ -78,6 +112,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  List<Todo> _filterTodos(List<Todo> todos) {
+    return todos.where((todo) {
+      return todo.text.contains(searchQuery);
+    }).where((todo) {
+      return hideCompleted ? todo.completedAt == null : true;
+    }).toList();
   }
 }
 
@@ -108,10 +150,25 @@ Stream<List<Todo>> _getTodosByUserId(String? userId) {
 }
 
 Future<void> _updateTodoStatus(String todoId, bool checked) async {
-  await FirebaseFirestore.instance
-      .collection(collectionTodo)
-      .doc(todoId)
-      .update({
+  await FirebaseFirestore.instance.collection(collectionTodo).doc(todoId).update({
     keyCompletedAt: checked ? FieldValue.serverTimestamp() : null,
   });
+}
+
+bool _areEqual(List<Todo> first, List<Todo> second) {
+  if (first.length != second.length) return false;
+
+  for (int i = 0; i < first.length; i++) {
+    bool hasMatch = false;
+    final firstItem = first[i];
+    for (final secondItem in second) {
+      if (firstItem.isEqualTo(secondItem)) {
+        hasMatch = true;
+        break;
+      }
+    }
+    if (!hasMatch) return false;
+  }
+
+  return true;
 }
