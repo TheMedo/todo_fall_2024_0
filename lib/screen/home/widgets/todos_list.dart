@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../data/model/todo.dart';
+
 class TodosList extends StatelessWidget {
   const TodosList({
     super.key,
@@ -7,7 +9,7 @@ class TodosList extends StatelessWidget {
     required this.onCheck,
   });
 
-  final List<Map<String, dynamic>> todos;
+  final List<Todo> todos;
   final void Function(String todoId, bool checked) onCheck;
 
   @override
@@ -16,20 +18,20 @@ class TodosList extends StatelessWidget {
       itemCount: todos.length,
       itemBuilder: (context, index) {
         final todo = todos[index];
-        final isCompleted = todo['completedAt'] != null;
+        final isCompleted = todo.completedAt != null;
 
         return ListTile(
           leading: Checkbox(
             value: isCompleted,
             onChanged: (value) {
               if (value != null) {
-                final todoId = todo['id']?.toString() ?? '';
+                final todoId = todo.id;
                 onCheck(todoId, value);
               }
             },
           ),
           title: Text(
-            todo['text']?.toString() ?? '',
+            todo.text,
             style: TextStyle(
               decoration: isCompleted ? TextDecoration.lineThrough : null,
             ),

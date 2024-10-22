@@ -7,6 +7,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/text_input_row.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/todos_list.dart';
 
+import '../../data/model/todo.dart';
+
 const collectionTodo = 'todos';
 const keyUserId = 'userId';
 const keyText = 'text';
@@ -44,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         children: [
           Expanded(
-            child: StreamBuilder<List<Map<String, dynamic>>>(
+            child: StreamBuilder<List<Todo>>(
               stream: _getTodosByUserId(userId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -92,7 +94,7 @@ Future<void> _addTodo(String text, String userId) async {
   }
 }
 
-Stream<List<Map<String, dynamic>>> _getTodosByUserId(String? userId) {
+Stream<List<Todo>> _getTodosByUserId(String? userId) {
   return FirebaseFirestore.instance
       .collection(collectionTodo)
       .where(keyUserId, isEqualTo: userId)
@@ -100,9 +102,7 @@ Stream<List<Map<String, dynamic>>> _getTodosByUserId(String? userId) {
       .snapshots()
       .map((snapshot) {
     return snapshot.docs.map((doc) {
-      final todo = doc.data();
-      todo['id'] = doc.id;
-      return todo;
+      return Todo.fromMap(doc.id, doc.data());
     }).toList();
   });
 }
