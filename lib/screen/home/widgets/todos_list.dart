@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_fall_2024_0/screen/details/details_screen.dart';
 
 import '../../../data/model/todo.dart';
 
@@ -23,14 +24,11 @@ class TodosList extends StatelessWidget {
         final isCompleted = todo.completedAt != null;
 
         return ListTile(
-          leading: Checkbox(
-            value: isCompleted,
-            onChanged: (value) {
-              if (value != null) {
-                final todoId = todo.id;
-                onCheck(todoId, value);
-              }
-            },
+          leading: IgnorePointer(
+            child: Checkbox(
+              value: isCompleted,
+              onChanged: (value) {},
+            ),
           ),
           title: Text(
             todo.text,
@@ -38,6 +36,20 @@ class TodosList extends StatelessWidget {
               decoration: isCompleted ? TextDecoration.lineThrough : null,
             ),
           ),
+          trailing: IconButton(
+            icon: Icon(Icons.chevron_right),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute<void>(builder: (context) => DetailsScreen(todo: todo)),
+              );
+            },
+          ),
+          onTap: () {
+            final value = !isCompleted;
+            final todoId = todo.id;
+            onCheck(todoId, value);
+          },
         );
       },
     );

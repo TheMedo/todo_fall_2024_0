@@ -13,6 +13,12 @@ class _TextInputRowState extends State<TextInputRow> {
   final TextEditingController _controller = TextEditingController();
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
@@ -37,11 +43,5 @@ class _TextInputRowState extends State<TextInputRow> {
         ),
       ],
     );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }
