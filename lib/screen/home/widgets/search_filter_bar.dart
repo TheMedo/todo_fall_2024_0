@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 class SearchFilterBar extends StatefulWidget {
   final void Function(String) onChanged;
+  final void Function() onFilter;
 
   const SearchFilterBar({
     required this.onChanged,
+    required this.onFilter,
     super.key,
   });
 
@@ -60,7 +62,11 @@ class _SearchFilterBarState extends State<SearchFilterBar> {
                   onPressed: _clearSearch,
                   color: Colors.grey,
                 )
-              : null,
+              : IconButton(
+                  icon: const Icon(Icons.more_vert),
+                  onPressed: widget.onFilter,
+                  color: Colors.grey,
+                ),
           hintText: 'Search...',
           hintStyle: const TextStyle(
             color: Colors.grey,

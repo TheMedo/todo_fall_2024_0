@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:todo_fall_2024_0/screen/home/sheets/filter_bottom_sheet.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/search_filter_bar.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/text_input_row.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/todos_list.dart';
@@ -79,14 +80,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 displayTodos = _filterTodos(allTodos);
               });
             },
-          ),
-          Checkbox(
-            value: hideCompleted,
-            onChanged: (checked) {
-              setState(() {
-                hideCompleted = checked ?? false;
-                displayTodos = _filterTodos(allTodos);
-              });
+            onFilter: () {
+              showModalBottomSheet<bool>(
+                  context: context,
+                  builder: (context) {
+                    return FilterBottomSheet(
+                      initialHideCompleted: hideCompleted,
+                      onHideCompleted: (checked) {
+                        setState(() {
+                          hideCompleted = checked;
+                          displayTodos = _filterTodos(allTodos);
+                        });
+                      },
+                    );
+                  });
             },
           ),
           Expanded(

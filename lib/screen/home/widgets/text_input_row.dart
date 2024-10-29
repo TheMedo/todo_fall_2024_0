@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TextInputRow extends StatefulWidget {
-  final Function(String) onAdd;
+  final void Function(String) onAdd;
 
   const TextInputRow({super.key, required this.onAdd});
 
