@@ -15,8 +15,6 @@ class TodosList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (todos.isEmpty) return Center(child: Text('Add your first ToDo'));
-
     return ListView.builder(
       itemCount: todos.length,
       itemBuilder: (context, index) {

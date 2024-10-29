@@ -39,38 +39,25 @@ class _SearchFilterBarState extends State<SearchFilterBar> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
       ),
       child: TextField(
         controller: _controller,
         onChanged: widget.onChanged,
         decoration: InputDecoration(
-          prefixIcon: const Icon(
-            Icons.search,
-            color: Colors.grey,
-          ),
+          prefixIcon: const Icon(Icons.search),
           suffixIcon: _controller.text.isNotEmpty
               ? IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: _clearSearch,
-                  color: Colors.grey,
                 )
               : IconButton(
                   icon: const Icon(Icons.more_vert),
                   onPressed: widget.onFilter,
-                  color: Colors.grey,
                 ),
           hintText: 'Search...',
-          hintStyle: const TextStyle(
-            color: Colors.grey,
-            fontSize: 16,
+          hintStyle: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
           ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(

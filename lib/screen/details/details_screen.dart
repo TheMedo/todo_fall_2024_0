@@ -37,9 +37,6 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = MediaQuery.of(context).platformBrightness;
-    final isDarkMode = brightness == Brightness.dark;
-
     return PopScope(
       onPopInvokedWithResult: (isPopped, _) {
         if (isPopped && text != widget.todo.text) {
@@ -53,32 +50,32 @@ class _DetailsScreenState extends State<DetailsScreen> {
             style: Theme.of(context).textTheme.headlineLarge,
           ),
           centerTitle: true,
-        ),
-        body: Column(
-          children: [
-            TextField(
-              controller: _controller,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  text = value;
-                });
-              },
-            ),
-            ElevatedButton(
+          actions: [
+            IconButton(
               onPressed: () {
                 _deleteTodo(widget.todo.id);
                 Navigator.of(context).pop();
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isDarkMode ? Colors.red : Colors.deepOrange,
-                foregroundColor: Colors.white,
-              ),
-              child: Text('Delete'),
-            ),
+              icon: Icon(Icons.delete_outline),
+              tooltip: 'Delete',
+            )
           ],
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              TextField(
+                controller: _controller,
+                decoration: InputDecoration(labelText: 'Edit todo'),
+                onChanged: (value) {
+                  setState(() {
+                    text = value;
+                  });
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

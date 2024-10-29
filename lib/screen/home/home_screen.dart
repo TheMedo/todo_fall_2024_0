@@ -73,28 +73,31 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
-          SearchFilterBar(
-            onChanged: (query) {
-              setState(() {
-                searchQuery = query;
-                displayTodos = _filterTodos(allTodos);
-              });
-            },
-            onFilter: () {
-              showModalBottomSheet<bool>(
-                  context: context,
-                  builder: (context) {
-                    return FilterBottomSheet(
-                      initialHideCompleted: hideCompleted,
-                      onHideCompleted: (checked) {
-                        setState(() {
-                          hideCompleted = checked;
-                          displayTodos = _filterTodos(allTodos);
-                        });
-                      },
-                    );
-                  });
-            },
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: SearchFilterBar(
+              onChanged: (query) {
+                setState(() {
+                  searchQuery = query;
+                  displayTodos = _filterTodos(allTodos);
+                });
+              },
+              onFilter: () {
+                showModalBottomSheet<bool>(
+                    context: context,
+                    builder: (context) {
+                      return FilterBottomSheet(
+                        initialHideCompleted: hideCompleted,
+                        onHideCompleted: (checked) {
+                          setState(() {
+                            hideCompleted = checked;
+                            displayTodos = _filterTodos(allTodos);
+                          });
+                        },
+                      );
+                    });
+              },
+            ),
           ),
           Expanded(
             child: TodosList(
@@ -104,11 +107,14 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ),
-          TextInputRow(
-            onAdd: (text) {
-              if (userId == null) return;
-              _addTodo(text, userId);
-            },
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TextInputRow(
+              onAdd: (text) {
+                if (userId == null) return;
+                _addTodo(text, userId);
+              },
+            ),
           ),
         ],
       ),

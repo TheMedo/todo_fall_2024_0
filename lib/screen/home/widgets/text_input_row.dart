@@ -27,7 +27,13 @@ class _TextInputRowState extends State<TextInputRow> {
             controller: _controller,
             decoration: InputDecoration(
               hintText: 'Enter your todo',
-              border: OutlineInputBorder(),
+              hintStyle: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(25),
+              ),
+              prefixIcon: Icon(Icons.edit_outlined),
             ),
           ),
         ),
@@ -39,6 +45,11 @@ class _TextInputRowState extends State<TextInputRow> {
               _controller.clear();
             }
           },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blueGrey,
+            foregroundColor: Colors.white,
+            fixedSize: const Size(88, 54),
+          ),
           child: Text('Add'),
         ),
       ],
