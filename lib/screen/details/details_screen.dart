@@ -37,6 +37,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = MediaQuery.of(context).platformBrightness;
+    final isDarkMode = brightness == Brightness.dark;
+
     return PopScope(
       onPopInvokedWithResult: (isPopped, _) {
         if (isPopped && text != widget.todo.text) {
@@ -70,7 +73,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 Navigator.of(context).pop();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: isDarkMode ? Colors.red : Colors.deepOrange,
                 foregroundColor: Colors.white,
               ),
               child: Text('Delete'),
