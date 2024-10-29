@@ -34,11 +34,4 @@ class Todo {
       'userId': userId,
     };
   }
-
-  bool isEqualTo(Todo other) {
-    if (text != other.text) return false;
-    if (completedAt == null && other.completedAt != null) return false;
-    if (completedAt != null && other.completedAt == null) return false;
-    return true;
-  }
 }

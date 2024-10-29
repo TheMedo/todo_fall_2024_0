@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,6 +29,26 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Todo> displayTodos = [];
   String searchQuery = '';
   bool hideCompleted = false;
+
+  StreamSubscription<List<Todo>>? _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    _subscription = _getTodosByUserId(userId).listen((todos) {
+      setState(() {
+        allTodos = todos;
+        displayTodos = _filterTodos(todos);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _subscription?.cancel();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,37 +90,10 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           Expanded(
-            child: StreamBuilder<List<Todo>>(
-              stream: _getTodosByUserId(userId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-
-                if (!snapshot.hasData || (snapshot.data?.isEmpty ?? true)) {
-                  return Center(child: Text('Add your first ToDo'));
-                }
-
-                final backendTodos = snapshot.data ?? [];
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (!_areEqual(allTodos, backendTodos)) {
-                    setState(() {
-                      allTodos = backendTodos;
-                      displayTodos = _filterTodos(backendTodos);
-                    });
-                  }
-                });
-
-                return TodosList(
-                  todos: displayTodos,
-                  onCheck: (todoId, checked) {
-                    _updateTodoStatus(todoId, checked);
-                  },
-                );
+            child: TodosList(
+              todos: displayTodos,
+              onCheck: (todoId, checked) {
+                _updateTodoStatus(todoId, checked);
               },
             ),
           ),
@@ -153,22 +147,4 @@ Future<void> _updateTodoStatus(String todoId, bool checked) async {
   await FirebaseFirestore.instance.collection(collectionTodo).doc(todoId).update({
     keyCompletedAt: checked ? FieldValue.serverTimestamp() : null,
   });
-}
-
-bool _areEqual(List<Todo> first, List<Todo> second) {
-  if (first.length != second.length) return false;
-
-  for (int i = 0; i < first.length; i++) {
-    bool hasMatch = false;
-    final firstItem = first[i];
-    for (final secondItem in second) {
-      if (firstItem.isEqualTo(secondItem)) {
-        hasMatch = true;
-        break;
-      }
-    }
-    if (!hasMatch) return false;
-  }
-
-  return true;
 }
