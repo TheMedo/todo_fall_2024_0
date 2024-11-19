@@ -8,6 +8,7 @@ class Todo {
   final DateTime? timestamp;
   final DateTime? dueDate;
   final String userId;
+  final bool? priority;
 
   Todo({
     required this.id,
@@ -16,7 +17,8 @@ class Todo {
     required this.timestamp,
     required this.dueDate,
     required this.userId,
-    required this.description
+    required this.description,
+    required this.priority
   });
 
   factory Todo.fromMap(String id, Map<String, dynamic> map) {
@@ -24,6 +26,7 @@ class Todo {
       id: id,
       completedAt: (map['completedAt'] as Timestamp?)?.toDate(),
       text: map['text']?.toString() ?? '',
+      priority: map['priority'] as bool? ?? false,
       description:map['description']?.toString() ?? '',
       timestamp: (map['timestamp'] as Timestamp?)?.toDate(),
       dueDate: (map['dueDate'] as Timestamp?)?.toDate(),
@@ -36,6 +39,7 @@ class Todo {
       'completedAt': completedAt == null ? null : Timestamp.fromDate(completedAt!),
       'text': text,
       'description': description,
+      'priority': priority,
       'timestamp': timestamp == null ? null : Timestamp.fromDate(timestamp!),
       'dueDate': dueDate == null ? null : Timestamp.fromDate(dueDate!),
       'userId': userId,
