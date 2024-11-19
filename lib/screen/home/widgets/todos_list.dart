@@ -34,6 +34,7 @@ class TodosList extends StatelessWidget {
               decoration: isCompleted ? TextDecoration.lineThrough : null,
             ),
           ),
+          subtitle: todo.dueDate == null ? null : Text(todo.dueDate.toString()),
           trailing: IconButton(
             icon: Icon(Icons.chevron_right),
             onPressed: () {
