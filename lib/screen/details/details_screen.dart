@@ -25,21 +25,26 @@ class DetailsScreen extends StatefulWidget {
 
 class _DetailsScreenState extends State<DetailsScreen> {
   TextEditingController? _controller;
+  TextEditingController? _descriptionController;
 
   String? text;
+  String? description;
   DateTime? dueDate;
 
   @override
   void initState() {
     super.initState();
     text = widget.todo.text;
+    description = widget.todo.description;
     dueDate = widget.todo.dueDate;
     _controller = TextEditingController(text: text);
+    _descriptionController = TextEditingController(text: description);
   }
 
   @override
   void dispose() {
     _controller?.dispose();
+    _descriptionController?.dispose();
     super.dispose();
   }
 
@@ -48,7 +53,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
     return PopScope(
       onPopInvokedWithResult: (isPopped, _) {
         if (isPopped && text != widget.todo.text) {
-          _updateTodo(widget.todo.id, text ?? '');
+          _updateText(widget.todo.id, text ?? '');
+        }
+        if (isPopped && description != widget.todo.description) {
+          _updateDescription(widget.todo.id, description ?? '');
         }
       },
       child: Scaffold(
@@ -79,6 +87,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 onChanged: (value) {
                   setState(() {
                     text = value;
+                  });
+                },
+              ),
+              TextField(
+                controller: _descriptionController,
+                decoration: InputDecoration(labelText: 'Description'),
+                onChanged: (value) {
+                  setState(() {
+                    description = value;
                   });
                 },
               ),
@@ -172,10 +189,20 @@ Future<void> _deleteTodo(String todoId) async {
   }
 }
 
-Future<void> _updateTodo(String todoId, String text) async {
+Future<void> _updateText(String todoId, String text) async {
   try {
     await FirebaseFirestore.instance.collection(collectionTodo).doc(todoId).update({
       'text': text,
+    });
+  } catch (e, st) {
+    log('Error updating todo', error: e, stackTrace: st);
+  }
+}
+
+Future<void> _updateDescription(String todoId, String description) async {
+  try {
+    await FirebaseFirestore.instance.collection(collectionTodo).doc(todoId).update({
+      'description': description,
     });
   } catch (e, st) {
     log('Error updating todo', error: e, stackTrace: st);
