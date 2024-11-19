@@ -39,17 +39,18 @@ class TodosList extends StatelessWidget {
               ? null
               : Text(
                   formatDateTime(todo.dueDate),
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(color: DateTime.now().isAfter(todo.dueDate!) ? Colors.redAccent : null),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: DateTime.now().isAfter(todo.dueDate!)
+                          ? Colors.redAccent
+                          : null),
                 ),
           trailing: IconButton(
             icon: Icon(Icons.chevron_right),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute<void>(builder: (context) => DetailsScreen(todo: todo)),
+                MaterialPageRoute<void>(
+                    builder: (context) => DetailsScreen(todo: todo)),
               );
             },
           ),

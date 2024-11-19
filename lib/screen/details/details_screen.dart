@@ -30,6 +30,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   String? text;
   String? description;
   DateTime? dueDate;
+  bool? priority;
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
     text = widget.todo.text;
     description = widget.todo.description;
     dueDate = widget.todo.dueDate;
+    priority = widget.todo.priority;
     _controller = TextEditingController(text: text);
     _descriptionController = TextEditingController(text: description);
   }
@@ -175,6 +177,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
                         icon: Icon(Icons.close),
                       ),
               ),
+              CheckboxListTile(
+                title: Text('Priority'),
+                value: priority ?? false,
+                onChanged: (bool? value) {
+                  setState(() {
+                    priority = value ?? false;
+                  });
+                  _updatePriority(widget.todo.id, value ?? false);
+                },
+              ),
             ],
           ),
         ),
@@ -214,6 +226,19 @@ Future<void> _updateDescription(String todoId, String description) async {
         .doc(todoId)
         .update({
       'description': description,
+    });
+  } catch (e, st) {
+    log('Error updating todo', error: e, stackTrace: st);
+  }
+}
+
+Future<void> _updatePriority(String todoId, bool value) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection(collectionTodo)
+        .doc(todoId)
+        .update({
+      'priority': value,
     });
   } catch (e, st) {
     log('Error updating todo', error: e, stackTrace: st);

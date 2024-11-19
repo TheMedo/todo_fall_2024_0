@@ -7,6 +7,7 @@ class Todo {
   final String? description;
   final DateTime? timestamp;
   final DateTime? dueDate;
+  final bool? priority;
   final String userId;
 
   Todo({
@@ -16,6 +17,7 @@ class Todo {
     required this.description,
     required this.timestamp,
     required this.dueDate,
+    required this.priority,
     required this.userId,
   });
 
@@ -27,6 +29,7 @@ class Todo {
       description: map['description']?.toString() ?? '',
       timestamp: (map['timestamp'] as Timestamp?)?.toDate(),
       dueDate: (map['dueDate'] as Timestamp?)?.toDate(),
+      priority: map['priority'] as bool? ?? false,
       userId: map['userId']?.toString() ?? '',
     );
   }
@@ -39,6 +42,7 @@ class Todo {
       'description': description,
       'timestamp': timestamp == null ? null : Timestamp.fromDate(timestamp!),
       'dueDate': dueDate == null ? null : Timestamp.fromDate(dueDate!),
+      'priority': priority,
       'userId': userId,
     };
   }
