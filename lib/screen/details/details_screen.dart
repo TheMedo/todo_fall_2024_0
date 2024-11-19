@@ -25,21 +25,26 @@ class DetailsScreen extends StatefulWidget {
 
 class _DetailsScreenState extends State<DetailsScreen> {
   TextEditingController? _controller;
+  TextEditingController? _descriptionController;
 
   String? text;
+  String? description;
   DateTime? dueDate;
 
   @override
   void initState() {
     super.initState();
     text = widget.todo.text;
+    description = widget.todo.description;
     dueDate = widget.todo.dueDate;
     _controller = TextEditingController(text: text);
+    _descriptionController = TextEditingController(text: description);
   }
 
   @override
   void dispose() {
     _controller?.dispose();
+    _descriptionController?.dispose();
     super.dispose();
   }
 
@@ -48,7 +53,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
     return PopScope(
       onPopInvokedWithResult: (isPopped, _) {
         if (isPopped && text != widget.todo.text) {
-          _updateTodo(widget.todo.id, text ?? '');
+          _updateText(widget.todo.id, text ?? '');
+        }
+        if (isPopped && description != widget.todo.description) {
+          _updateDescription(widget.todo.id, description ?? '');
         }
       },
       child: Scaffold(
@@ -82,6 +90,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
                   });
                 },
               ),
+              TextField(
+                controller: _descriptionController,
+                decoration: InputDecoration(labelText: 'Description'),
+                onChanged: (value) {
+                  setState(() {
+                    description = value;
+                  });
+                },
+              ),
               SizedBox(height: 16),
               ListTile(
                 title: Text('Due date'),
@@ -89,15 +106,16 @@ class _DetailsScreenState extends State<DetailsScreen> {
                     ? null
                     : Text(
                         formatDateTime(dueDate),
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(color: DateTime.now().isAfter(dueDate!) ? Colors.redAccent : null),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: DateTime.now().isAfter(dueDate!)
+                                ? Colors.redAccent
+                                : null),
                       ),
                 trailing: dueDate == null
                     ? IconButton(
                         onPressed: () async {
-                          final isGranted = await _requestNotificationPermission();
+                          final isGranted =
+                              await _requestNotificationPermission();
                           if (!context.mounted) return;
 
                           if (!isGranted) {
@@ -119,7 +137,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
                           if (pickedDate != null) {
                             final pickedTime = await showTimePicker(
                               context: context,
-                              initialTime: TimeOfDay.fromDateTime(DateTime.now()),
+                              initialTime:
+                                  TimeOfDay.fromDateTime(DateTime.now()),
                             );
 
                             if (pickedTime != null) {
@@ -166,16 +185,35 @@ class _DetailsScreenState extends State<DetailsScreen> {
 
 Future<void> _deleteTodo(String todoId) async {
   try {
-    await FirebaseFirestore.instance.collection(collectionTodo).doc(todoId).delete();
+    await FirebaseFirestore.instance
+        .collection(collectionTodo)
+        .doc(todoId)
+        .delete();
   } catch (e, st) {
     log('Error deleting todo', error: e, stackTrace: st);
   }
 }
 
-Future<void> _updateTodo(String todoId, String text) async {
+Future<void> _updateText(String todoId, String text) async {
   try {
-    await FirebaseFirestore.instance.collection(collectionTodo).doc(todoId).update({
+    await FirebaseFirestore.instance
+        .collection(collectionTodo)
+        .doc(todoId)
+        .update({
       'text': text,
+    });
+  } catch (e, st) {
+    log('Error updating todo', error: e, stackTrace: st);
+  }
+}
+
+Future<void> _updateDescription(String todoId, String description) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection(collectionTodo)
+        .doc(todoId)
+        .update({
+      'description': description,
     });
   } catch (e, st) {
     log('Error updating todo', error: e, stackTrace: st);
@@ -184,7 +222,10 @@ Future<void> _updateTodo(String todoId, String text) async {
 
 Future<void> _setDueDate(String todoId, DateTime? dueDate) async {
   try {
-    await FirebaseFirestore.instance.collection(collectionTodo).doc(todoId).update({
+    await FirebaseFirestore.instance
+        .collection(collectionTodo)
+        .doc(todoId)
+        .update({
       'dueDate': dueDate,
     });
   } catch (e, st) {
@@ -194,7 +235,8 @@ Future<void> _setDueDate(String todoId, DateTime? dueDate) async {
 
 Future<bool> _requestNotificationPermission() async {
   final isGranted = await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission() ??
       false;
   return isGranted;
@@ -205,7 +247,10 @@ void _showPermissionDeniedSnackbar(BuildContext context) {
     SnackBar(
       content: Text(
         'You need to enable notifications to set due date.',
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+        style: Theme.of(context)
+            .textTheme
+            .bodyMedium
+            ?.copyWith(color: Colors.white),
       ),
       backgroundColor: Colors.redAccent,
       duration: Duration(seconds: 10),
@@ -223,7 +268,8 @@ void _showPermissionDeniedSnackbar(BuildContext context) {
 }
 
 Future<void> _initializeNotifications() async {
-  final initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
+  final initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
   final InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
   );
@@ -250,7 +296,8 @@ Future<void> _scheduleNotification(
       ),
     ),
     androidScheduleMode: AndroidScheduleMode.inexact,
-    uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+    uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
     matchDateTimeComponents: DateTimeComponents.dateAndTime,
   );
 }
