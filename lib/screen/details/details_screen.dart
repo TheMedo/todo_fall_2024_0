@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:todo_fall_2024_0/data/model/todo.dart';
+import 'package:todo_fall_2024_0/data/util/format.dart';
 import 'package:todo_fall_2024_0/screen/home/home_screen.dart';
 
 final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -84,7 +85,15 @@ class _DetailsScreenState extends State<DetailsScreen> {
               SizedBox(height: 16),
               ListTile(
                 title: Text('Due date'),
-                subtitle: dueDate == null ? null : Text(dueDate?.toString() ?? ''),
+                subtitle: dueDate == null
+                    ? null
+                    : Text(
+                        formatDateTime(dueDate),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: DateTime.now().isAfter(dueDate!) ? Colors.redAccent : null),
+                      ),
                 trailing: dueDate == null
                     ? IconButton(
                         onPressed: () async {

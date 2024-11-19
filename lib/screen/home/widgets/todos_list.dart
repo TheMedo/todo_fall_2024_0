@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_fall_2024_0/data/util/format.dart';
 import 'package:todo_fall_2024_0/screen/details/details_screen.dart';
 
 import '../../../data/model/todo.dart';
@@ -34,7 +35,15 @@ class TodosList extends StatelessWidget {
               decoration: isCompleted ? TextDecoration.lineThrough : null,
             ),
           ),
-          subtitle: todo.dueDate == null ? null : Text(todo.dueDate.toString()),
+          subtitle: todo.dueDate == null
+              ? null
+              : Text(
+                  formatDateTime(todo.dueDate),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium
+                      ?.copyWith(color: DateTime.now().isAfter(todo.dueDate!) ? Colors.redAccent : null),
+                ),
           trailing: IconButton(
             icon: Icon(Icons.chevron_right),
             onPressed: () {
