@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Todo {
@@ -8,6 +10,7 @@ class Todo {
   final DateTime? dueDate;
   final String userId;
   final String? description;
+  final bool priority;
 
   Todo({
     required this.id,
@@ -17,6 +20,7 @@ class Todo {
     required this.dueDate,
     required this.userId,
     required this.description,
+    required this.priority,
   });
 
   factory Todo.fromMap(String id, Map<String, dynamic> map) {
@@ -28,6 +32,7 @@ class Todo {
       dueDate: (map['dueDate'] as Timestamp?)?.toDate(),
       userId: map['userId']?.toString() ?? '',
       description: map['description']?.toString() ?? '',
+      priority: map['priority'] as bool? ?? false,
     );
   }
 
@@ -40,6 +45,7 @@ class Todo {
       'dueDate': dueDate == null ? null : Timestamp.fromDate(dueDate!),
       'userId': userId,
       'description': description,
+      'priority': priority,
     };
   }
 }

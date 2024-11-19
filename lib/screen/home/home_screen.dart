@@ -157,7 +157,10 @@ Stream<List<Todo>> _getTodosByUserId(String? userId) {
 }
 
 Future<void> _updateTodoStatus(String todoId, bool checked) async {
-  await FirebaseFirestore.instance.collection(collectionTodo).doc(todoId).update({
+  await FirebaseFirestore.instance
+      .collection(collectionTodo)
+      .doc(todoId)
+      .update({
     keyCompletedAt: checked ? FieldValue.serverTimestamp() : null,
   });
 }
