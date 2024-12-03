@@ -1,15 +1,14 @@
 import 'dart:async';
 import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:confetti/confetti.dart'; // Add this import
 import 'package:todo_fall_2024_0/screen/home/sheets/filter_bottom_sheet.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/search_filter_bar.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/text_input_row.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/todos_list.dart';
-
 import '../../data/model/todo.dart';
 
 const collectionTodo = 'todos';
@@ -32,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool hideCompleted = false;
   String selectedSortOption = 'timestamp';
   DateTime? timestamp; // Ensure correct type
+  late ConfettiController _confettiController; // Confetti controller
 
   StreamSubscription<List<Todo>>? _subscription;
 
@@ -39,6 +39,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     final userId = FirebaseAuth.instance.currentUser?.uid;
+
+    // Initialize Confetti controller
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 1));
+
     _subscription = _getTodosByUserId(userId).listen((todos) {
       setState(() {
         allTodos = todos;
@@ -51,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     super.dispose();
     _subscription?.cancel();
+    _confettiController.dispose(); // Dispose confetti controller
   }
 
   @override
@@ -70,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
               await GoogleSignIn().signOut();
             },
             icon: Icon(Icons.logout),
-          )
+          ),
         ],
       ),
       body: Column(
@@ -110,11 +116,29 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Expanded(
-            child: TodosList(
-              todos: displayTodos,
-              onCheck: (todoId, checked) {
-                _updateTodoStatus(todoId, checked);
-              },
+            child: Stack(
+              // Use Stack to overlay confetti
+              children: [
+                TodosList(
+                  todos: displayTodos,
+                  onCheck: (todoId, checked) {
+                    _updateTodoStatus(todoId, checked);
+                    if (checked) {
+                      _confettiController
+                          .play(); // Trigger confetti when checked
+                    }
+                  },
+                ),
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: ConfettiWidget(
+                    confettiController: _confettiController,
+                    blastDirectionality: BlastDirectionality.explosive,
+                    numberOfParticles: 20,
+                    gravity: 0.2,
+                  ),
+                ),
+              ],
             ),
           ),
           Padding(
