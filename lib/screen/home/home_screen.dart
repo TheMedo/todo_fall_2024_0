@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'ToDo',
+          'Tasks',
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         centerTitle: true,

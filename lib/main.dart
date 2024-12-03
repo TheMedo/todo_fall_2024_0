@@ -70,7 +70,7 @@ class _MyAppState extends State<MyApp> {
       themeMode: ThemeMode.system,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('TODO Fall 2024'),
+          title: const Text(''),
           actions: [
             // Dropdown menu to select a theme
             DropdownButtonHideUnderline(
