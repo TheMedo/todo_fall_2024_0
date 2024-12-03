@@ -30,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Todo> displayTodos = [];
   String searchQuery = '';
   bool hideCompleted = false;
+  bool showPriorityOnly = false;
 
   StreamSubscription<List<Todo>>? _subscription;
 
@@ -94,6 +95,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             displayTodos = _filterTodos(allTodos);
                           });
                         },
+                        initialShowPriorityOnly:
+                            showPriorityOnly, // Pass current priority filter state
+                        onShowPriorityOnly: (value) {
+                          setState(() {
+                            showPriorityOnly = value;
+                            displayTodos = _filterTodos(allTodos);
+                          });
+                        },
                       );
                     });
               },
@@ -126,6 +135,8 @@ class _HomeScreenState extends State<HomeScreen> {
       return todo.text.contains(searchQuery);
     }).where((todo) {
       return hideCompleted ? todo.completedAt == null : true;
+    }).where((todo) {
+      return showPriorityOnly ? todo.priority == true : true;
     }).toList();
   }
 }
@@ -157,7 +168,10 @@ Stream<List<Todo>> _getTodosByUserId(String? userId) {
 }
 
 Future<void> _updateTodoStatus(String todoId, bool checked) async {
-  await FirebaseFirestore.instance.collection(collectionTodo).doc(todoId).update({
+  await FirebaseFirestore.instance
+      .collection(collectionTodo)
+      .doc(todoId)
+      .update({
     keyCompletedAt: checked ? FieldValue.serverTimestamp() : null,
   });
 }
