@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:todo_fall_2024_0/firebase_options.dart';
 import 'package:todo_fall_2024_0/screen/router/router_screen.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:todo_fall_2024_0/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,9 +36,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       themeMode: ThemeMode.system,
-      home: Scaffold(
-        body: const RouterScreen(),
-      ),
+      home: SplashScreen(), // Show the splash screen first
     );
   }
 }
