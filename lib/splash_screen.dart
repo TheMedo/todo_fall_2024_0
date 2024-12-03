@@ -38,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             SizedBox(height: 20),
             Text(
-              'ToDo App',
+              'Productive Penguin',
               style: TextStyle(fontSize: 24, color: Colors.white),
             ),
           ],
