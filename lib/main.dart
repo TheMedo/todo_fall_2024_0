@@ -13,20 +13,53 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  // Default theme is BlueGrey
+  ThemeData _currentTheme = ThemeData(
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.blueGrey,
+      brightness: Brightness.light,
+    ),
+    useMaterial3: true,
+  );
+
+  // Define multiple themes
+  final Map<String, ThemeData> _themes = {
+    'BlueGrey': ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.blueGrey,
+        brightness: Brightness.light,
+      ),
+      useMaterial3: true,
+    ),
+    'Pink': ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.pink,
+        brightness: Brightness.light,
+      ),
+      useMaterial3: true,
+    ),
+    'Green': ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.green,
+        brightness: Brightness.light,
+      ),
+      useMaterial3: true,
+    ),
+  };
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'TODO Fall 2024',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blueGrey,
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-      ),
+      theme: _currentTheme,
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.blueGrey,
@@ -36,6 +69,31 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system,
       home: Scaffold(
+        appBar: AppBar(
+          title: const Text('TODO Fall 2024'),
+          actions: [
+            // Dropdown menu to select a theme
+            DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                icon: const Icon(Icons.color_lens), // Display a theme icon
+                hint: const Text("Theme"), // Label before selection
+                onChanged: (String? newTheme) {
+                  if (newTheme != null) {
+                    setState(() {
+                      _currentTheme = _themes[newTheme]!;
+                    });
+                  }
+                },
+                items: _themes.keys.map((String themeName) {
+                  return DropdownMenuItem<String>(
+                    value: themeName,
+                    child: Text(themeName),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
         body: const RouterScreen(),
       ),
     );
