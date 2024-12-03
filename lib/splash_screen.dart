@@ -1,4 +1,3 @@
-// splash_screen.dart
 import 'package:flutter/material.dart';
 import 'package:todo_fall_2024_0/screen/home/home_screen.dart'; // Import the HomeScreen
 
@@ -29,10 +28,13 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.check_circle, // Use your logo or icon here
-              size: 100,
-              color: Colors.white,
+            // Display the splash image
+            Image.asset(
+              'assets/productive_penguin.png', // Path to the image in the assets folder
+              width: 200, // Adjust the width and height as needed
+              height: 200,
+              fit: BoxFit
+                  .cover, // Adjust how the image fits within the container
             ),
             SizedBox(height: 20),
             Text(
