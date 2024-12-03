@@ -10,7 +10,7 @@ class Todo {
   final DateTime? dueDate;
   final String userId;
   final bool? priority;
-  final IconData? icon; // New field for icon
+  final int? icon; // New field for icon
 
   Todo({
     required this.id,
@@ -21,7 +21,7 @@ class Todo {
     required this.userId,
     required this.description,
     required this.priority,
-    this.icon, // Add icon to the constructor
+    required this.icon, // Add icon to the constructor
   });
 
   factory Todo.fromMap(String id, Map<String, dynamic> map) {
@@ -34,9 +34,8 @@ class Todo {
       timestamp: (map['timestamp'] as Timestamp?)?.toDate(),
       dueDate: (map['dueDate'] as Timestamp?)?.toDate(),
       userId: map['userId']?.toString() ?? '',
-      icon: map['icon'] != null
-          ? IconData(map['icon'])
-          : null, // Deserialize the icon
+      icon: map['icon'] as int?,
+      // Deserialize the icon
     );
   }
 
@@ -50,9 +49,7 @@ class Todo {
       'timestamp': timestamp == null ? null : Timestamp.fromDate(timestamp!),
       'dueDate': dueDate == null ? null : Timestamp.fromDate(dueDate!),
       'userId': userId,
-      'icon': icon != null
-          ? icon!.codePoint
-          : null, // Serialize the icon as codePoint
+      'icon': icon, // Serialize the icon as codePoint
     };
   }
 }

@@ -8,6 +8,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:todo_fall_2024_0/data/model/todo.dart';
 import 'package:todo_fall_2024_0/data/util/format.dart';
 import 'package:todo_fall_2024_0/screen/home/home_screen.dart';
+import 'package:todo_fall_2024_0/screen/home/widgets/icon_picker.dart'; // Import the icon picker
 
 final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -30,6 +31,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   String? text;
   String? description;
   DateTime? dueDate;
+  IconData? selectedIcon;
 
   @override
   void initState() {
@@ -37,6 +39,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
     text = widget.todo.text;
     description = widget.todo.description;
     dueDate = widget.todo.dueDate;
+    final icon = widget.todo.icon;
+    selectedIcon =
+        icon == null ? null : IconData(icon, fontFamily: 'MaterialIcons');
     _controller = TextEditingController(text: text);
     _descriptionController = TextEditingController(text: description);
   }
@@ -57,6 +62,9 @@ class _DetailsScreenState extends State<DetailsScreen> {
         }
         if (isPopped && description != widget.todo.description) {
           _updateDescription(widget.todo.id, description ?? '');
+        }
+        if (isPopped && selectedIcon?.codePoint != widget.todo.icon) {
+          _updateIcon(widget.todo.id, selectedIcon);
         }
       },
       child: Scaffold(
@@ -81,6 +89,27 @@ class _DetailsScreenState extends State<DetailsScreen> {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
+              // Icon selection
+              Row(
+                children: [
+                  selectedIcon != null
+                      ? Icon(selectedIcon, size: 40)
+                      : Icon(Icons.category, size: 40),
+                  SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () async {
+                      final icon = await showIconPicker(context);
+                      if (icon != null) {
+                        setState(() {
+                          selectedIcon = icon;
+                        });
+                      }
+                    },
+                    child: Text('Select Icon'),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16),
               TextField(
                 controller: _controller,
                 decoration: InputDecoration(labelText: 'Edit todo'),
@@ -180,6 +209,19 @@ class _DetailsScreenState extends State<DetailsScreen> {
         ),
       ),
     );
+  }
+}
+
+Future<void> _updateIcon(String todoId, IconData? icon) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection(collectionTodo)
+        .doc(todoId)
+        .update({
+      'icon': icon?.codePoint,
+    });
+  } catch (e, st) {
+    log('Error updating icon', error: e, stackTrace: st);
   }
 }
 

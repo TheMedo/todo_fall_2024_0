@@ -33,11 +33,21 @@ class TodosList extends StatelessWidget {
               onChanged: (value) {},
             ),
           ),
-          title: Text(
-            todo.text,
-            style: TextStyle(
-              decoration: isCompleted ? TextDecoration.lineThrough : null,
-            ),
+          title: Row(
+            children: [
+              if (todo.icon != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child:
+                      Icon(IconData(todo.icon!, fontFamily: 'MaterialIcons')),
+                ),
+              Text(
+                todo.text,
+                style: TextStyle(
+                  decoration: isCompleted ? TextDecoration.lineThrough : null,
+                ),
+              ),
+            ],
           ),
           subtitle: todo.dueDate == null
               ? null
@@ -54,7 +64,7 @@ class TodosList extends StatelessWidget {
               IconButton(
                   icon: Icon(
                       todo.priority ?? false ? Icons.star : Icons.star_border),
-                      color: todo.priority ?? false ? Colors.yellow : Colors.grey,
+                  color: todo.priority ?? false ? Colors.yellow : Colors.grey,
                   onPressed: () {
                     final isChecked = todo.priority ?? false;
                     _updatePriority(todo.id, !isChecked); // Firestore update

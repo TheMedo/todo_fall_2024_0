@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:todo_fall_2024_0/screen/home/widgets/icon_picker.dart'; // Import the icon picker
 import 'package:todo_fall_2024_0/screen/home/sheets/filter_bottom_sheet.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/search_filter_bar.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/text_input_row.dart';
@@ -17,6 +18,7 @@ const keyUserId = 'userId';
 const keyText = 'text';
 const keyCompletedAt = 'completedAt';
 const keyTimestamp = 'timestamp';
+const keyIcon = 'icon'; // New key for icons
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Todo> displayTodos = [];
   String searchQuery = '';
   bool hideCompleted = false;
+  IconData? selectedIcon;
 
   StreamSubscription<List<Todo>>? _subscription;
 
@@ -108,11 +111,14 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(16),
             child: TextInputRow(
               onAdd: (text) {
                 if (userId == null) return;
-                _addTodo(text, userId);
+                _addTodo(text, userId, selectedIcon);
+                setState(() {
+                  selectedIcon = null; // Reset icon after adding
+                });
               },
             ),
           ),
@@ -130,13 +136,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-Future<void> _addTodo(String text, String userId) async {
+Future<void> _addTodo(String text, String userId, IconData? icon) async {
   try {
     await FirebaseFirestore.instance.collection(collectionTodo).add({
       keyText: text,
       keyUserId: userId,
       keyTimestamp: FieldValue.serverTimestamp(),
       keyCompletedAt: null,
+      keyIcon: icon?.codePoint, // Save the selected icon's codePoint
     });
   } catch (e, st) {
     log('Error adding todo', error: e, stackTrace: st);
@@ -157,7 +164,10 @@ Stream<List<Todo>> _getTodosByUserId(String? userId) {
 }
 
 Future<void> _updateTodoStatus(String todoId, bool checked) async {
-  await FirebaseFirestore.instance.collection(collectionTodo).doc(todoId).update({
+  await FirebaseFirestore.instance
+      .collection(collectionTodo)
+      .doc(todoId)
+      .update({
     keyCompletedAt: checked ? FieldValue.serverTimestamp() : null,
   });
 }
