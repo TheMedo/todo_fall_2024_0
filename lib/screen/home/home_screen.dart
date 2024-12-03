@@ -57,9 +57,16 @@ class _HomeScreenState extends State<HomeScreen> {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Image.asset(
+            'lib/images/ic_launcher.png',
+            fit: BoxFit.contain,
+          ),
+        ),
         title: Text(
-          'ToDo',
-          style: Theme.of(context).textTheme.headlineLarge,
+          'Get Gnawing Away',
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
         centerTitle: true,
         actions: [
