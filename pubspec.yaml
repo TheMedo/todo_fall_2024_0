@@ -34,8 +34,8 @@ flutter:
 flutter_native_splash:
   color: "#96DCF8"
   android_12:
-    image: "/Users/amonq/StudioProjects/todo_fall_2024_0/lib/images/testScreen.png"
-    color: "#96DCF8"
+    image: "lib/images/smallerSplashScreen.png"
+    color: "#FFFFFF"
     icon_background_color: "#111111"
 
 
