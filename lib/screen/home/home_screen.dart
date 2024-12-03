@@ -30,6 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Todo> displayTodos = [];
   String searchQuery = '';
   bool hideCompleted = false;
+  String selectedSortOption = 'timestamp';
+  DateTime? timestamp; // Ensure correct type
 
   StreamSubscription<List<Todo>>? _subscription;
 
@@ -84,18 +86,26 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               onFilter: () {
                 showModalBottomSheet<bool>(
-                    context: context,
-                    builder: (context) {
-                      return FilterBottomSheet(
-                        initialHideCompleted: hideCompleted,
-                        onHideCompleted: (checked) {
-                          setState(() {
-                            hideCompleted = checked;
-                            displayTodos = _filterTodos(allTodos);
-                          });
-                        },
-                      );
-                    });
+                  context: context,
+                  builder: (context) {
+                    return FilterBottomSheet(
+                      initialHideCompleted: hideCompleted,
+                      initialSortOption: selectedSortOption,
+                      onHideCompleted: (checked) {
+                        setState(() {
+                          hideCompleted = checked;
+                          displayTodos = _filterTodos(allTodos);
+                        });
+                      },
+                      onSortOptionChanged: (sortOption) {
+                        setState(() {
+                          selectedSortOption = sortOption;
+                          displayTodos = _filterTodos(allTodos);
+                        });
+                      },
+                    );
+                  },
+                );
               },
             ),
           ),
@@ -122,11 +132,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<Todo> _filterTodos(List<Todo> todos) {
-    return todos.where((todo) {
+    final filteredTodos = todos.where((todo) {
       return todo.text.contains(searchQuery);
     }).where((todo) {
       return hideCompleted ? todo.completedAt == null : true;
     }).toList();
+
+    return filteredTodos
+      ..sort((a, b) {
+        if (selectedSortOption == 'priority') {
+          return b.priority ? 1 : -1;
+        } else if (selectedSortOption == 'timestamp') {
+          final aTimestamp = a.timestamp ?? DateTime.now();
+          final bTimestamp = b.timestamp ?? DateTime.now();
+          return bTimestamp.compareTo(aTimestamp);
+        }
+        return 0;
+      });
   }
 }
 
