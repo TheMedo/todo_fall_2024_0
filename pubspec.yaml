@@ -19,6 +19,8 @@ dependencies:
   app_settings: ^5.1.1
   timezone: ^0.10.0
   intl: ^0.19.0
+  flutter_native_splash: ^2.4.3
+
 
 
 dev_dependencies:
@@ -26,6 +28,18 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_icons:
+  android: true
+  image_path: "web/icons/play_store_512.png"
 
 flutter:
   uses-material-design: true
+
+
+flutter_native_splash:
+  background_color: "#A181F6"
+  image: "web/icons/play_store_512.png"
+
+
