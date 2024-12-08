@@ -1,343 +1,187 @@
-import 'dart:developer';
-
-import 'package:app_settings/app_settings.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:todo_fall_2024_0/data/model/todo.dart';
-import 'package:todo_fall_2024_0/data/util/format.dart';
-import 'package:todo_fall_2024_0/screen/home/home_screen.dart';
-
-final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../data/model/todo.dart';
 
 class DetailsScreen extends StatefulWidget {
-  const DetailsScreen({
-    required this.todo,
-    super.key,
-  });
-
   final Todo todo;
 
+  const DetailsScreen({super.key, required this.todo});
+
   @override
-  _DetailsScreenState createState() => _DetailsScreenState();
+  State<DetailsScreen> createState() => _DetailsScreenState();
 }
 
 class _DetailsScreenState extends State<DetailsScreen> {
-  TextEditingController? _controller;
-  TextEditingController? _descriptionController;
+  late TextEditingController _textController;
+  late TextEditingController _descriptionController;
+  late DateTime? _dueDate;
+  late bool _priority;
+  late Color? _selectedColor;
 
-  String? text;
-  String? description;
-  DateTime? dueDate;
-  bool? priority;
+// In your DetailsScreen class, update the color options list like this:
+  final List<Color?> _colorOptions = [  // Change the type to List<Color?>
+    null, // Option for no color
+    Colors.red.shade100,
+    Colors.blue.shade100,
+    Colors.green.shade100,
+    Colors.yellow.shade100,
+    Colors.purple.shade100,
+    Colors.orange.shade100,
+    Colors.pink.shade100,
+    Colors.teal.shade100,
+  ];
 
   @override
   void initState() {
     super.initState();
-    text = widget.todo.text;
-    description = widget.todo.description;
-    dueDate = widget.todo.dueDate;
-    priority = widget.todo.priority;
-    _controller = TextEditingController(text: text);
-    _descriptionController = TextEditingController(text: description);
+    _textController = TextEditingController(text: widget.todo.text);
+    _descriptionController = TextEditingController(text: widget.todo.description);
+    _dueDate = widget.todo.dueDate;
+    _priority = widget.todo.priority;
+    _selectedColor = widget.todo.backgroundColor;
   }
 
   @override
   void dispose() {
-    _controller?.dispose();
-    _descriptionController?.dispose();
+    _textController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      onPopInvokedWithResult: (isPopped, _) {
-        if (isPopped && text != widget.todo.text) {
-          _updateText(widget.todo.id, text ?? '');
-        }
-        if (isPopped && description != widget.todo.description) {
-          _updateDescription(widget.todo.id, description ?? '');
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Details',
-            style: Theme.of(context).textTheme.headlineLarge,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Edit Todo'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.save),
+            onPressed: _saveTodo,
           ),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              onPressed: () {
-                _deleteTodo(widget.todo.id);
-                Navigator.of(context).pop();
-              },
-              icon: Icon(Icons.delete_outline),
-              tooltip: 'Delete',
-            )
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: _textController,
+              decoration: InputDecoration(
+                labelText: 'Task',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _descriptionController,
+              decoration: InputDecoration(
+                labelText: 'Description',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+            SizedBox(height: 16),
+            Row(
+              children: [
+                Text('Due Date: '),
+                TextButton(
+                  onPressed: _pickDate,
+                  child: Text(_dueDate == null
+                      ? 'Select Date'
+                      : '${_dueDate!.month}/${_dueDate!.day}/${_dueDate!.year}'),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Text('Priority: '),
+                Switch(
+                  value: _priority,
+                  onChanged: (value) {
+                    setState(() {
+                      _priority = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Background Color',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _colorOptions.map((color) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedColor = color;
+                    });
+                  },
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: color ?? Theme.of(context).cardColor,
+                      border: Border.all(
+                        color: color == _selectedColor
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.grey,
+                        width: color == _selectedColor ? 2 : 1,
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: color == null
+                        ? Icon(Icons.block, color: Colors.grey)
+                        : null,
+                  ),
+                );
+              }).toList(),
+            ),
           ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              TextField(
-                controller: _controller,
-                decoration: InputDecoration(labelText: 'Edit todo'),
-                onChanged: (value) {
-                  setState(() {
-                    text = value;
-                  });
-                },
-              ),
-              TextField(
-                controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
-                onChanged: (value) {
-                  setState(() {
-                    description = value;
-                  });
-                },
-              ),
-              SizedBox(height: 16),
-              ListTile(
-                title: Text('Due date'),
-                subtitle: dueDate == null
-                    ? null
-                    : Text(
-                        formatDateTime(dueDate),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: DateTime.now().isAfter(dueDate!)
-                                ? Colors.redAccent
-                                : null),
-                      ),
-                trailing: dueDate == null
-                    ? IconButton(
-                        onPressed: () async {
-                          final isGranted =
-                              await _requestNotificationPermission();
-                          if (!context.mounted) return;
-
-                          if (!isGranted) {
-                            _showPermissionDeniedSnackbar(context);
-                            return;
-                          }
-
-                          await _initializeNotifications();
-                          if (!context.mounted) return;
-
-                          final pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime(2100),
-                          );
-                          if (!context.mounted) return;
-
-                          if (pickedDate != null) {
-                            final pickedTime = await showTimePicker(
-                              context: context,
-                              initialTime:
-                                  TimeOfDay.fromDateTime(DateTime.now()),
-                            );
-
-                            if (pickedTime != null) {
-                              final dueDate = DateTime(
-                                pickedDate.year,
-                                pickedDate.month,
-                                pickedDate.day,
-                                pickedTime.hour,
-                                pickedTime.minute,
-                              );
-                              _setDueDate(widget.todo.id, dueDate);
-                              setState(() {
-                                this.dueDate = dueDate;
-                              });
-
-                              await _scheduleNotification(
-                                widget.todo.id,
-                                dueDate,
-                                widget.todo.text,
-                              );
-                            }
-                          }
-                        },
-                        icon: Icon(Icons.add),
-                      )
-                    : IconButton(
-                        onPressed: () {
-                          _setDueDate(widget.todo.id, null);
-                          setState(() {
-                            dueDate = null;
-                          });
-                          _cancelNotification(widget.todo.id);
-                        },
-                        icon: Icon(Icons.close),
-                      ),
-              ),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'High Priority',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  Checkbox(
-                    value: priority ?? false,
-                    onChanged: (value) async {
-                      setState(() {
-                        priority = value;
-                      });
-                      if (value != null) {
-                        await _updatePriority(widget.todo.id, value);
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
-}
 
-Future<void> _deleteTodo(String todoId) async {
-  try {
-    await FirebaseFirestore.instance
-        .collection(collectionTodo)
-        .doc(todoId)
-        .delete();
-  } catch (e, st) {
-    log('Error deleting todo', error: e, stackTrace: st);
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dueDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(Duration(days: 365)),
+    );
+    if (picked != null) {
+      setState(() {
+        _dueDate = picked;
+      });
+    }
   }
-}
 
-Future<void> _updateText(String todoId, String text) async {
-  try {
-    await FirebaseFirestore.instance
-        .collection(collectionTodo)
-        .doc(todoId)
-        .update({
-      'text': text,
-    });
-  } catch (e, st) {
-    log('Error updating todo', error: e, stackTrace: st);
+  Future<void> _saveTodo() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('todos')
+          .doc(widget.todo.id)
+          .update({
+        'text': _textController.text,
+        'description': _descriptionController.text,
+        'dueDate': _dueDate == null ? null : Timestamp.fromDate(_dueDate!),
+        'priority': _priority,
+        'backgroundColor': _selectedColor?.value,
+      });
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error updating todo')),
+      );
+    }
   }
-}
-
-Future<void> _updateDescription(String todoId, String description) async {
-  try {
-    await FirebaseFirestore.instance
-        .collection(collectionTodo)
-        .doc(todoId)
-        .update({
-      'description': description,
-    });
-  } catch (e, st) {
-    log('Error updating todo', error: e, stackTrace: st);
-  }
-}
-
-Future<void> _setDueDate(String todoId, DateTime? dueDate) async {
-  try {
-    await FirebaseFirestore.instance
-        .collection(collectionTodo)
-        .doc(todoId)
-        .update({
-      'dueDate': dueDate,
-    });
-  } catch (e, st) {
-    log('Error setting due date', error: e, stackTrace: st);
-  }
-}
-
-Future<void> _updatePriority(String todoId, bool priority) async {
-  try {
-    await FirebaseFirestore.instance
-        .collection(collectionTodo)
-        .doc(todoId)
-        .update({
-      'priority': priority,
-    });
-  } catch (e, st) {
-    log('Error updating priority', error: e, stackTrace: st);
-  }
-}
-
-Future<bool> _requestNotificationPermission() async {
-  final isGranted = await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.requestNotificationsPermission() ??
-      false;
-  return isGranted;
-}
-
-void _showPermissionDeniedSnackbar(BuildContext context) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(
-        'You need to enable notifications to set due date.',
-        style: Theme.of(context)
-            .textTheme
-            .bodyMedium
-            ?.copyWith(color: Colors.white),
-      ),
-      backgroundColor: Colors.redAccent,
-      duration: Duration(seconds: 10),
-      action: SnackBarAction(
-        label: 'Open Settings',
-        textColor: Colors.white,
-        onPressed: () {
-          AppSettings.openAppSettings(
-            type: AppSettingsType.notification,
-          );
-        },
-      ),
-    ),
-  );
-}
-
-Future<void> _initializeNotifications() async {
-  final initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-  final InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-  );
-  await flutterLocalNotificationsPlugin.initialize(
-    initializationSettings,
-  );
-}
-
-Future<void> _scheduleNotification(
-  String todoId,
-  DateTime dueDate,
-  String text,
-) async {
-  final tzDateTime = tz.TZDateTime.from(dueDate, tz.local);
-  await flutterLocalNotificationsPlugin.zonedSchedule(
-    todoId.hashCode,
-    'Task due',
-    text,
-    tzDateTime,
-    const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'general_channel',
-        'General Notifications',
-      ),
-    ),
-    androidScheduleMode: AndroidScheduleMode.inexact,
-    uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
-    matchDateTimeComponents: DateTimeComponents.dateAndTime,
-  );
-}
-
-Future<void> _cancelNotification(String todoId) async {
-  await flutterLocalNotificationsPlugin.cancel(todoId.hashCode);
 }

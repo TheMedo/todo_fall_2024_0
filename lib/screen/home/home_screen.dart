@@ -183,6 +183,9 @@ Future<void> _addTodo(String text, String userId) async {
       keyUserId: userId,
       keyTimestamp: FieldValue.serverTimestamp(),
       keyCompletedAt: null,
+      'description': '',
+      'priority': false,
+      'backgroundColor': null,
     });
   } catch (e, st) {
     log('Error adding todo', error: e, stackTrace: st);
