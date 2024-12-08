@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../data/model/todo.dart';
+import 'package:todo_fall_2024_0/data/model/todo.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth for user identity
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:app_settings/app_settings.dart'; // For opening app settings
+import 'package:intl/intl.dart'; // Import the intl package for date formatting
+
+final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 class DetailsScreen extends StatefulWidget {
   final Todo todo;
@@ -18,8 +25,7 @@ class _DetailsScreenState extends State<DetailsScreen> {
   late bool _priority;
   late Color? _selectedColor;
 
-// In your DetailsScreen class, update the color options list like this:
-  final List<Color?> _colorOptions = [  // Change the type to List<Color?>
+  final List<Color?> _colorOptions = [
     null, // Option for no color
     Colors.red.shade100,
     Colors.blue.shade100,
@@ -35,7 +41,8 @@ class _DetailsScreenState extends State<DetailsScreen> {
   void initState() {
     super.initState();
     _textController = TextEditingController(text: widget.todo.text);
-    _descriptionController = TextEditingController(text: widget.todo.description);
+    _descriptionController =
+        TextEditingController(text: widget.todo.description);
     _dueDate = widget.todo.dueDate;
     _priority = widget.todo.priority;
     _selectedColor = widget.todo.backgroundColor;
@@ -54,6 +61,10 @@ class _DetailsScreenState extends State<DetailsScreen> {
       appBar: AppBar(
         title: Text('Edit Todo'),
         actions: [
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: _deleteTodo,
+          ),
           IconButton(
             icon: Icon(Icons.save),
             onPressed: _saveTodo,
@@ -87,9 +98,11 @@ class _DetailsScreenState extends State<DetailsScreen> {
                 Text('Due Date: '),
                 TextButton(
                   onPressed: _pickDate,
-                  child: Text(_dueDate == null
-                      ? 'Select Date'
-                      : '${_dueDate!.month}/${_dueDate!.day}/${_dueDate!.year}'),
+                  child: Text(
+                    _dueDate == null
+                        ? 'Select Date'
+                        : '${_dueDate!.month}/${_dueDate!.day}/${_dueDate!.year} ${DateFormat('HH:mm').format(_dueDate!)}',
+                  ),
                 ),
               ],
             ),
@@ -149,16 +162,29 @@ class _DetailsScreenState extends State<DetailsScreen> {
   }
 
   Future<void> _pickDate() async {
-    final picked = await showDatePicker(
+    final pickedDate = await showDatePicker(
       context: context,
       initialDate: _dueDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(Duration(days: 365)),
     );
-    if (picked != null) {
-      setState(() {
-        _dueDate = picked;
-      });
+    if (pickedDate != null) {
+      final pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(_dueDate ?? DateTime.now()),
+      );
+      if (pickedTime != null) {
+        setState(() {
+          _dueDate = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+        });
+        final formattedTime = DateFormat('HH:mm').format(_dueDate!);
+      }
     }
   }
 
@@ -175,13 +201,51 @@ class _DetailsScreenState extends State<DetailsScreen> {
         'backgroundColor': _selectedColor?.value,
       });
 
+      if (_dueDate != null) {
+        await _scheduleNotification(_dueDate!);
+      }
+
       if (mounted) {
-        Navigator.pop(context);
+        Navigator.pop(context); // Navigate back to main screen after saving
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating todo')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error updating todo')));
     }
+  }
+
+  Future<void> _deleteTodo() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('todos')
+          .doc(widget.todo.id)
+          .delete();
+      if (mounted) {
+        Navigator.pop(context); // Navigate back to main screen after deleting
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error deleting todo')));
+    }
+  }
+
+  Future<void> _scheduleNotification(DateTime dueDate) async {
+    final tzDateTime = tz.TZDateTime.from(dueDate, tz.local);
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      widget.todo.id.hashCode,
+      'Task due',
+      widget.todo.text,
+      tzDateTime,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'general_channel',
+          'General Notifications',
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.inexact,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.dateAndTime,
+    );
   }
 }
