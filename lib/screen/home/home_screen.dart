@@ -9,6 +9,7 @@ import 'package:todo_fall_2024_0/screen/home/sheets/filter_bottom_sheet.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/search_filter_bar.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/text_input_row.dart';
 import 'package:todo_fall_2024_0/screen/home/widgets/todos_list.dart';
+import 'package:todo_fall_2024_0/screen/login/login_screen.dart';
 import '../../data/model/todo.dart';
 
 const collectionTodo = 'todos';
@@ -74,6 +75,10 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               await GoogleSignIn().signOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()),
+              );
             },
             icon: Icon(Icons.logout),
           ),
